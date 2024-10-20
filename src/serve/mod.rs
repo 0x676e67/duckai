@@ -5,7 +5,8 @@ mod signal;
 
 use crate::Result;
 use crate::{config::Config, error::Error};
-use axum::Json;
+use axum::headers::authorization::Bearer;
+use axum::headers::Authorization;
 use axum::{
     extract::DefaultBodyLimit,
     http::StatusCode,
@@ -13,9 +14,12 @@ use axum::{
     routing::{get, post},
     Router,
 };
+use axum::{Json, TypedHeader};
 use axum_server::{tls_rustls::RustlsConfig, AddrIncomingConfig, Handle, HttpConfig};
 use client::ClientLoadBalancer;
 use serde::Serialize;
+use std::ops::Deref;
+use std::sync::Arc;
 use std::{path::PathBuf, time::Duration};
 use tower::limit::ConcurrencyLimitLayer;
 use tower_http::{
@@ -25,6 +29,37 @@ use tower_http::{
 use tracing::Level;
 use tracing_subscriber::{EnvFilter, FmtSubscriber};
 use typed_builder::TypedBuilder;
+
+#[derive(Clone, TypedBuilder)]
+pub struct AppState {
+    client: ClientLoadBalancer,
+    api_key: Arc<Option<String>>,
+}
+
+impl Deref for AppState {
+    type Target = ClientLoadBalancer;
+
+    fn deref(&self) -> &Self::Target {
+        &self.client
+    }
+}
+
+impl AppState {
+    #[inline]
+    pub fn valid_key(
+        &self,
+        bearer: Option<TypedHeader<Authorization<Bearer>>>,
+    ) -> crate::Result<()> {
+        let api_key = bearer.as_deref().map(|b| b.token());
+        self.api_key.as_deref().map_or(Ok(()), |key| {
+            if api_key.map_or(false, |api_key| api_key == key) {
+                Ok(())
+            } else {
+                Err(crate::Error::InvalidApiKey)
+            }
+        })
+    }
+}
 
 #[tokio::main]
 pub async fn run(path: PathBuf) -> Result<()> {
@@ -55,12 +90,17 @@ pub async fn run(path: PathBuf) -> Result<()> {
         .layer(DefaultBodyLimit::max(209715200))
         .layer(ConcurrencyLimitLayer::new(config.concurrent));
 
+    let app_state = AppState::builder()
+        .client(ClientLoadBalancer::new(config.clone()).await)
+        .api_key(Arc::new(config.api_key))
+        .build();
+
     let router = Router::new()
         .route("/ping", get(route::ping))
         .route("/v1/models", get(route::models))
         .route("/v1/chat/completions", post(route::chat_completions))
         .fallback(route::manual_hello)
-        .with_state(ClientLoadBalancer::new(config.clone()).await)
+        .with_state(app_state)
         .layer(global_layer);
 
     // Signal the server to shutdown using Handle.
@@ -179,6 +219,16 @@ impl IntoResponse for Error {
                 Json(RootError {
                     error: ResponseError::builder()
                         .message(json_rejection.body_text())
+                        .type_field("invalid_request_error")
+                        .build(),
+                }),
+            )
+                .into_response(),
+            Error::InvalidApiKey => (
+                StatusCode::UNAUTHORIZED,
+                Json(RootError {
+                    error: ResponseError::builder()
+                        .message(self.to_string())
                         .type_field("invalid_request_error")
                         .build(),
                 }),

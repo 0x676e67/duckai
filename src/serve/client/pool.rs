@@ -115,6 +115,7 @@ impl Pool {
         }
     }
 
+    #[inline]
     pub async fn load_client(&self) -> Client {
         match self {
             Pool::Default(client) => client.clone(),

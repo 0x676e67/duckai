@@ -36,14 +36,14 @@ pub struct Config {
     pub tls_key: Option<PathBuf>,
 
     /// Authentication Key
-    pub auth_key: Option<String>,
+    pub api_key: Option<String>,
 }
 
 impl Default for Config {
     fn default() -> Self {
         Self {
             debug: false,
-            bind: SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 8080),
+            bind: SocketAddr::new(IpAddr::V4(Ipv4Addr::new(0, 0, 0, 0)), 8080),
             timeout: 60,
             connect_timeout: 10,
             tcp_keepalive: Some(90),
@@ -51,7 +51,7 @@ impl Default for Config {
             proxies: Default::default(),
             tls_cert: Default::default(),
             tls_key: Default::default(),
-            auth_key: Default::default(),
+            api_key: Default::default(),
         }
     }
 }

@@ -1,15 +1,19 @@
-use std::sync::LazyLock;
-
 use super::{
-    client::ClientLoadBalancer,
     model::{ChatRequest, ModelData, Models, Pong},
+    AppState,
 };
 use crate::error::Error;
 use crate::Result;
-use axum::{extract::State, response::Response, Json};
+use axum::{
+    extract::State,
+    headers::{authorization::Bearer, Authorization},
+    response::Response,
+    Json, TypedHeader,
+};
 use axum_extra::extract::WithRejection;
 use process::ChatProcess;
 use rquest::{header, Client};
+use std::sync::LazyLock;
 use tracing::Instrument;
 
 const ORIGIN_API: &str = "https://duckduckgo.com";
@@ -22,7 +26,12 @@ pub async fn ping() -> Json<Pong> {
     Json(Pong { message: "pong" })
 }
 
-pub async fn models() -> Json<Models> {
+pub async fn models(
+    State(state): State<AppState>,
+    bearer: Option<TypedHeader<Authorization<Bearer>>>,
+) -> Result<Json<Models>> {
+    state.valid_key(bearer)?;
+
     static MODEL_DATA: LazyLock<[ModelData; 4]> = LazyLock::new(|| {
         [
             ModelData::builder()
@@ -44,14 +53,18 @@ pub async fn models() -> Json<Models> {
         ]
     });
 
-    Json(Models::builder().object("list").data(&MODEL_DATA).build())
+    Ok(Json(
+        Models::builder().object("list").data(&MODEL_DATA).build(),
+    ))
 }
 
 pub async fn chat_completions(
-    State(client): State<ClientLoadBalancer>,
+    State(state): State<AppState>,
+    bearer: Option<TypedHeader<Authorization<Bearer>>>,
     WithRejection(Json(body), _): WithRejection<Json<ChatRequest>, Error>,
 ) -> crate::Result<Response> {
-    let client = client.load_client().await;
+    state.valid_key(bearer)?;
+    let client = state.load_client().await;
     let token = load_token(&client).await?;
     let span = tracing::info_span!("x-vqd-4", token);
     send_request(client, token, body).instrument(span).await
