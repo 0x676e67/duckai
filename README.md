@@ -2,6 +2,7 @@
 
 ![Crates.io License](https://img.shields.io/crates/l/duckai)
 ![crates.io](https://img.shields.io/crates/v/duckai.svg)
+![Crates.io Total Downloads](https://img.shields.io/crates/d/duckai)
 
 DuckDuckGo AI to OpenAI
 
@@ -118,7 +119,11 @@ tcp_keepalive: 90
 concurrent: 100
 
 # 代理池
-proxies: []
+proxies:
+- !url http://127.0.0.1:6152
+- !url socks5://127.0.0.1:6153
+- !cidr 2001:470:e953::/48
+- !iface 192.168.1.10
 
 # 启用 TLS
 tls_cert: null
@@ -132,17 +137,9 @@ api_key: null
 
 `IP`代理池类型支持三种类型（优先级：`CIDR` > `Proxy` > `Interface`，使用轮训策略）:
 
-- `URL`，支持`http`/`https`/`socks4`/`socks5`/`socks5h`
+- `URL`，协议支持：`http`/`https`/`socks4`/`socks5`/`socks5h`
 - `Interface`，即绑定本地网络接口地址
 - `CIDR`，支持`IPv4`/`IPv6`子网，前提是子网路由正常通信
-
-代理池配置填写模版:
-
-- 绑定本地`Interface`: `["192.168.1.10", "192.168.1.11"]`
-
-- 绑定`CIDR`: `["2001:470:e953::/48"]`
-  
-- 绑定代理`URL`: `["http://127.0.0.1:6152", "socks5://127.0.0.1:6153"]`
 
 </details>
 

@@ -1,10 +1,11 @@
 use cidr::IpCidr;
-use serde::{Deserialize, Deserializer, Serialize};
+use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 use std::net::IpAddr;
 use url::Url;
 
-#[derive(Serialize, Clone)]
+#[derive(Clone, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum Proxies {
     /// Upstream proxy, supports http, https, socks4, socks5, socks5h
     URL(Url),
@@ -39,22 +40,5 @@ impl From<IpAddr> for Proxies {
 impl From<IpCidr> for Proxies {
     fn from(cidr: IpCidr) -> Self {
         Proxies::CIDR(cidr)
-    }
-}
-
-impl<'de> Deserialize<'de> for Proxies {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
-    where
-        D: Deserializer<'de>,
-    {
-        let s = String::deserialize(deserializer)?;
-        let proxy = match (s.parse::<IpAddr>(), Url::parse(&s), s.parse::<IpCidr>()) {
-            (Ok(ip_addr), _, _) => Proxies::from(ip_addr),
-            (_, Ok(url), _) => Proxies::from(url),
-            (_, _, Ok(cidr)) => Proxies::from(cidr),
-            _ => return Err(serde::de::Error::custom("failed to parse proxies")),
-        };
-
-        Ok(proxy)
     }
 }
