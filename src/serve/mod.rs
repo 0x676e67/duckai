@@ -185,7 +185,7 @@ impl IntoResponse for Error {
             )
                 .into_response(),
             _ => (
-                StatusCode::BAD_REQUEST,
+                StatusCode::INTERNAL_SERVER_ERROR,
                 Json(RootError {
                     error: ResponseError::builder()
                         .message(self.to_string())

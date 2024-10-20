@@ -31,8 +31,6 @@ pub enum Error {
     #[error(transparent)]
     ResolveError(#[from] hickory_resolver::error::ResolveError),
 
-    // The `#[from]` attribute generates `From<JsonRejection> for ApiError`
-    // implementation. See `thiserror` docs for more information
     #[error(transparent)]
     JsonExtractorRejection(#[from] axum::extract::rejection::JsonRejection),
 

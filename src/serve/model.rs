@@ -25,6 +25,7 @@ pub struct ChatRequest {
     #[serde(deserialize_with = "deserialize_model")]
     model: String,
 
+    #[serde(deserialize_with = "deserialize_message")]
     messages: Vec<Message>,
 
     #[serde(skip_serializing, default)]
@@ -41,7 +42,7 @@ impl ChatRequest {
     }
 }
 
-#[derive(Serialize, Default, Deserialize, TypedBuilder)]
+#[derive(Serialize, Deserialize, Default, TypedBuilder)]
 pub struct Message {
     #[builder(default, setter(into))]
     role: Option<Role>,
@@ -63,6 +64,21 @@ where
     };
 
     Ok(model.to_owned())
+}
+
+fn deserialize_message<'de, D>(deserializer: D) -> Result<Vec<Message>, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let mut message: Vec<Message> = Vec::deserialize(deserializer)?;
+    for message in &mut message {
+        if let Some(role) = message.role.as_mut() {
+            if matches!(role, Role::System | Role::Critic) {
+                *role = Role::User;
+            }
+        }
+    }
+    Ok(message)
 }
 
 // ==================== Duck APi Response Body ====================
