@@ -66,8 +66,7 @@ async fn send_request(client: Client, token: String, body: ChatRequest) -> Resul
         .header("x-vqd-4", token)
         .json(&body)
         .send()
-        .await?
-        .error_for_status()?;
+        .await?;
 
     ChatProcess::builder()
         .resp(resp)
@@ -117,6 +116,12 @@ mod process {
 
     impl ChatProcess {
         pub async fn into_response(self) -> crate::Result<Response> {
+            // Handler bad request
+            if self.resp.error_for_status_ref().err().is_some() {
+                let bad_data = self.resp.text().await?;
+                return Err(crate::Error::BadRequest(bad_data));
+            }
+
             let raw_model = self.model;
 
             if self.stream.unwrap_or_default() {

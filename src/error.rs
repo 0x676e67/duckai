@@ -39,4 +39,7 @@ pub enum Error {
 
     #[error("Missing or invalid 'x-vqd-4' header")]
     MissingHeader,
+
+    #[error("{0}")]
+    BadRequest(String),
 }

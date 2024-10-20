@@ -5,22 +5,27 @@ use typed_builder::TypedBuilder;
 /// - `System`, for starting system message, that sets the tone of model
 /// - `Assistant`, for messages sent by ChatGPT
 /// - `User`, for messages sent by user
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum Role {
-    /// A system message, automatically sent at the start to set the tone of the model
     System,
-    /// A message sent by ChatGPT
     Assistant,
-    /// A message sent by the user
     User,
-    /// A system message
-    Critic,
+}
+
+impl Role {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Role::System => "system",
+            Role::Assistant => "assistant",
+            Role::User => "user",
+        }
+    }
 }
 
 // ==================== Request Body ====================
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct ChatRequest {
     #[serde(deserialize_with = "deserialize_model")]
     model: String,
@@ -42,7 +47,7 @@ impl ChatRequest {
     }
 }
 
-#[derive(Serialize, Deserialize, Default, TypedBuilder)]
+#[derive(Debug, Serialize, Deserialize, Default, TypedBuilder)]
 pub struct Message {
     #[builder(default, setter(into))]
     role: Option<Role>,
@@ -71,14 +76,19 @@ where
     D: Deserializer<'de>,
 {
     let mut message: Vec<Message> = Vec::deserialize(deserializer)?;
+    let mut compression_message = String::new();
     for message in &mut message {
-        if let Some(role) = message.role.as_mut() {
-            if matches!(role, Role::System | Role::Critic) {
+        if let (Some(role), Some(msg)) = (message.role.as_mut(), &message.content) {
+            if matches!(role, Role::System) {
                 *role = Role::User;
             }
+            compression_message.push_str(&format!("{}:{};\n", role.as_str(), msg));
         }
     }
-    Ok(message)
+    Ok(vec![Message::builder()
+        .role(Role::User)
+        .content(compression_message)
+        .build()])
 }
 
 // ==================== Duck APi Response Body ====================
