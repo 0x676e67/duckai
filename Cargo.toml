@@ -50,13 +50,6 @@ axum-extra = { version =  "0.8.0" }
 tower-http = { version = "0.4.4", default-features = false, features = ["trace", "cors"] }
 tower = { version = "0.4.13", default-features = false, features = ["limit"] }
 
-# for memory allocator
-tcmalloc = { version = "0.3.0", optional = true }
-snmalloc-rs = { version = "0.3.4", optional = true }
-rpmalloc = { version = "0.2.2", optional = true }
-jemallocator = { package = "tikv-jemallocator", version = "0.6", optional = true }
-mimalloc = { version = "0.1.39", default-features = false, optional = true }
-
 # linux utils
 [target.'cfg(target_os = "linux")'.dependencies]
 sysctl = "0.5.4"
@@ -67,14 +60,10 @@ netlink-packet-route = "0.19"
 daemonize = "0.5.0"
 nix = { version = "0.29.0", features = ["user", "signal", "resource"] }
 sysinfo = { version = "0.30", default-features = false }
+jemallocator = { package = "tikv-jemallocator", version = "0.6" }
 
 [features]
-default = ["jemalloc"]
-jemalloc = ["dep:jemallocator"]
-tcmalloc = ["tcmalloc/bundled"]
-snmalloc = ["dep:snmalloc-rs"]
-rpmalloc = ["dep:rpmalloc"]
-mimalloc = ["dep:mimalloc"]
+default = []
 
 [profile.release]
 lto = true

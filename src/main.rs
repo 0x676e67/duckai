@@ -1,4 +1,3 @@
-mod alloc;
 mod config;
 #[cfg(target_family = "unix")]
 mod daemon;
@@ -10,6 +9,10 @@ mod update;
 use clap::{Args, Parser, Subcommand};
 pub use error::Error;
 use std::path::PathBuf;
+
+#[cfg(target_family = "unix")]
+#[global_allocator]
+static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
 type Result<T, E = Error> = std::result::Result<T, E>;
 
