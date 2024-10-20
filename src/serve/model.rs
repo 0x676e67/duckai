@@ -125,10 +125,10 @@ pub struct Pong {
     pub message: &'static str,
 }
 
-#[derive(Serialize, Deserialize, TypedBuilder)]
+#[derive(Serialize, TypedBuilder)]
 pub struct Models {
     object: &'static str,
-    data: Vec<ModelData>,
+    data: &'static [ModelData; 4],
 }
 
 #[derive(Serialize, Deserialize, TypedBuilder)]

@@ -1,3 +1,5 @@
+use std::sync::LazyLock;
+
 use super::{
     client::ClientLoadBalancer,
     model::{ChatRequest, ModelData, Models, Pong},
@@ -21,29 +23,28 @@ pub async fn ping() -> Json<Pong> {
 }
 
 pub async fn models() -> Json<Models> {
-    Json(
-        Models::builder()
-            .object("list")
-            .data(vec![
-                ModelData::builder()
-                    .id("gpt-4o-mini")
-                    .owned_by("openai")
-                    .build(),
-                ModelData::builder()
-                    .id("claude-3-haiku")
-                    .owned_by("claude")
-                    .build(),
-                ModelData::builder()
-                    .id("llama-3.1-70b")
-                    .owned_by("meta-llama")
-                    .build(),
-                ModelData::builder()
-                    .id("mixtral-8x7b")
-                    .owned_by("mistral ai")
-                    .build(),
-            ])
-            .build(),
-    )
+    static MODEL_DATA: LazyLock<[ModelData; 4]> = LazyLock::new(|| {
+        [
+            ModelData::builder()
+                .id("gpt-4o-mini")
+                .owned_by("openai")
+                .build(),
+            ModelData::builder()
+                .id("claude-3-haiku")
+                .owned_by("claude")
+                .build(),
+            ModelData::builder()
+                .id("llama-3.1-70b")
+                .owned_by("meta-llama")
+                .build(),
+            ModelData::builder()
+                .id("mixtral-8x7b")
+                .owned_by("mistral ai")
+                .build(),
+        ]
+    });
+
+    Json(Models::builder().object("list").data(&MODEL_DATA).build())
 }
 
 pub async fn chat_completions(
