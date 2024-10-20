@@ -32,8 +32,8 @@ impl Pool {
             (vec![], vec![], vec![]),
             |(mut proxies, mut interfaces, mut cidr), proxy| {
                 match proxy {
-                    Proxies::Proxy(v) => proxies.push(v),
-                    Proxies::Interface(v) => interfaces.push(v),
+                    Proxies::URL(v) => proxies.push(v),
+                    Proxies::Iface(v) => interfaces.push(v),
                     Proxies::CIDR(v) => cidr.push(v),
                 }
                 (proxies, interfaces, cidr)

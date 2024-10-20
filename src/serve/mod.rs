@@ -187,7 +187,7 @@ fn init_logger(debug: bool) -> Result<()> {
 /// Init configuration
 async fn init_config(path: PathBuf) -> Result<Config> {
     if !path.is_file() {
-        tracing::warn!("Using the default configuration");
+        println!("Using the default configuration");
         return Ok(Config::default());
     }
 
