@@ -20,7 +20,7 @@ fn get_pid() -> Option<String> {
 }
 
 /// Check if the current user is root
-pub fn check_root() {
+pub fn root() {
     if !nix::unistd::Uid::effective().is_root() {
         println!("You must run this executable with root permissions");
         std::process::exit(-1)
@@ -28,13 +28,18 @@ pub fn check_root() {
 }
 
 /// Start the daemon
-pub fn start(config_path: PathBuf) -> crate::Result<()> {
+pub fn start(mut config_path: PathBuf) -> crate::Result<()> {
     if let Some(pid) = get_pid() {
         println!("duckai is already running with pid: {}", pid);
         return Ok(());
     }
 
-    check_root();
+    root();
+
+    // relative path
+    if config_path.is_relative() {
+        config_path = std::env::current_dir()?.join(config_path)
+    }
 
     let pid_file = File::create(PID_PATH)?;
     pid_file.set_permissions(Permissions::from_mode(0o755))?;
@@ -73,7 +78,7 @@ pub fn start(config_path: PathBuf) -> crate::Result<()> {
 pub fn stop() -> crate::Result<()> {
     use nix::{sys::signal, unistd::Pid};
 
-    check_root();
+    root();
 
     if let Some(pid) = get_pid() {
         let pid = pid.parse::<i32>()?;
