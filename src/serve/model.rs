@@ -104,7 +104,7 @@ pub struct DuckChatCompletion {
 // ==================== Response Body ====================
 
 #[derive(Serialize, TypedBuilder)]
-pub struct ChatCompletion {
+pub struct ChatCompletion<'a> {
     #[builder(default, setter(into))]
     id: Option<String>,
 
@@ -113,7 +113,7 @@ pub struct ChatCompletion {
     #[builder(default, setter(into))]
     created: Option<u64>,
 
-    model: String,
+    model: &'a str,
 
     choices: Vec<Choice>,
 

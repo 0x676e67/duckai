@@ -153,7 +153,7 @@ mod process {
 
                             let chat_completion = ChatCompletion::builder()
                                 .id(body.id)
-                                .model(raw_model.clone())
+                                .model(&raw_model)
                                 .object("chat.completion.chunk")
                                 .created(body.created)
                                 .choices(vec![Choice::builder()
@@ -171,7 +171,7 @@ mod process {
 
                         let chat_completion = ChatCompletion::builder()
                             .id(body.id)
-                            .model(raw_model.clone())
+                            .model(&raw_model)
                             .object("chat.completion.chunk")
                             .created(body.created)
                             .choices(vec![Choice::builder()
@@ -226,7 +226,7 @@ mod process {
 
             let chat_completion = ChatCompletion::builder()
                 .id(id)
-                .model(raw_model)
+                .model(&raw_model)
                 .object("chat.completion")
                 .created(created)
                 .choices(vec![Choice::builder()
