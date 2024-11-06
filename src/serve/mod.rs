@@ -129,7 +129,7 @@ pub async fn run(path: PathBuf) -> Result<()> {
     match (config.tls_cert.as_ref(), config.tls_key.as_ref()) {
         (Some(cert), Some(key)) => {
             // Load TLS configuration
-            let tls_config = BoringSSLConfig::from_pem_file(cert, key)?;
+            let tls_config = BoringSSLConfig::from_pem_chain_file(cert, key)?;
 
             // Use TLS configuration to create a secure server
             axum_server::bind_boringssl(config.bind, tls_config)
