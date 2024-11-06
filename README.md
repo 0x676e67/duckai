@@ -94,6 +94,14 @@ cargo install duckai
 docker run --rm -it -p 8080:8080 ghcr.io/penumbra-x/duckai:latest run
 ```
 
+- Compile from source
+
+```bash
+cargo install cross
+cross build --target x86_64-unknown-linux-gnu --release
+cross build --target aarch64-unknown-linux-gnu --release
+```
+
 2. Generate config template file
 
 ```bash
