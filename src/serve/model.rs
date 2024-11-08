@@ -103,10 +103,8 @@ where
                     compression_message.push(format!("{}:{};", role.as_str(), msg))
                 }
                 Content::Vec(vec) => {
-                    let mut content = String::new();
-                    for wrapper in vec {
-                        content.push_str(&wrapper.text);
-                        compression_message.push(format!("{}:{};", role.as_str(), content));
+                    for item in vec {
+                        compression_message.push(format!("{}:{};", role.as_str(), item.text));
                     }
                 }
             }
