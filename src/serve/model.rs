@@ -24,7 +24,6 @@ impl Role {
 }
 
 // ==================== Request Body ====================
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct ChatRequest {
     #[serde(deserialize_with = "deserialize_model")]
@@ -61,12 +60,14 @@ where
     D: Deserializer<'de>,
 {
     let model = String::deserialize(deserializer)?;
+    tracing::info!("model: {}", model);
     let model = match model.as_str() {
         "claude-3-haiku" => "claude-3-haiku-20240307",
         "llama-3.1-70b" => "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
         "mixtral-8x7b" => "mistralai/Mixtral-8x7B-Instruct-v0.1",
         _ => "gpt-4o-mini",
     };
+    tracing::info!("model: {}", model);
 
     Ok(model.to_owned())
 }
@@ -97,15 +98,20 @@ where
 pub struct DuckChatCompletion {
     pub message: Option<String>,
     pub created: u64,
+    #[serde(default = "default_id")]
     pub id: String,
-    pub model: String,
+    pub model: Option<String>,
+}
+
+fn default_id() -> String {
+    "chatcmpl-123".to_owned()
 }
 
 // ==================== Response Body ====================
-
 #[derive(Serialize, TypedBuilder)]
 pub struct ChatCompletion<'a> {
     #[builder(default, setter(into))]
+    #[serde(default = "default_id")]
     id: Option<String>,
 
     object: &'static str,

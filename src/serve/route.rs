@@ -129,7 +129,6 @@ mod process {
 
     impl ChatProcess {
         pub async fn into_response(self) -> crate::Result<Response> {
-            // Handler bad request
             if self.resp.error_for_status_ref().err().is_some() {
                 let bad_data = self.resp.text().await?;
                 return Err(crate::Error::BadRequest(bad_data));
@@ -142,7 +141,6 @@ mod process {
                 let sse_stream = process_stream_with_chunk(
                     self.resp,
                     move |body| {
-                        // End message
                         if let Some(content) = body.message {
                             let role = if first_message {
                                 first_message = false;
@@ -182,7 +180,9 @@ mod process {
                                 .build()])
                             .build();
 
-                        tracing::info!("model mapper: {} -> {}", raw_model, body.model);
+                        if let Some(ref model) = body.model {
+                            tracing::info!("model mapper: {} -> {}", raw_model, model);
+                        }
 
                         Event::default()
                             .json_data(chat_completion)
@@ -220,7 +220,7 @@ mod process {
             })
             .await;
 
-            if let Some(model) = model {
+            if let Some(Some(model)) = model {
                 tracing::info!("model mapper: {} -> {}", raw_model, model);
             }
 
