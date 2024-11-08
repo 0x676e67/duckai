@@ -52,7 +52,21 @@ pub struct Message {
     role: Option<Role>,
 
     #[builder(default, setter(into))]
-    content: Option<String>,
+    content: Option<Content>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(untagged)]
+pub enum Content {
+    Text(String),
+    Vec(Vec<ContentItem>),
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ContentItem {
+    #[serde(rename = "type")]
+    r#type: String,
+    text: String,
 }
 
 fn deserialize_model<'de, D>(deserializer: D) -> Result<String, D::Error>
@@ -83,13 +97,25 @@ where
             if matches!(role, Role::System) {
                 *role = Role::User;
             }
-            compression_message.push(format!("{}:{};", role.as_str(), msg));
+
+            match msg {
+                Content::Text(msg) => {
+                    compression_message.push(format!("{}:{};", role.as_str(), msg))
+                }
+                Content::Vec(vec) => {
+                    let mut content = String::new();
+                    for wrapper in vec {
+                        content.push_str(&wrapper.text);
+                        compression_message.push(format!("{}:{};", role.as_str(), content));
+                    }
+                }
+            }
         }
     }
 
     Ok(vec![Message::builder()
         .role(Role::User)
-        .content(compression_message.join("\n"))
+        .content(Content::Text(compression_message.join("\n")))
         .build()])
 }
 

@@ -110,7 +110,9 @@ async fn load_token(client: &Client) -> Result<String> {
 
 mod process {
 
-    use crate::serve::model::{ChatCompletion, Choice, DuckChatCompletion, Message, Role, Usage};
+    use crate::serve::model::{
+        ChatCompletion, Choice, Content, DuckChatCompletion, Message, Role, Usage,
+    };
     use axum::{
         response::{sse::Event, IntoResponse, Response, Sse},
         Error, Json,
@@ -156,7 +158,12 @@ mod process {
                                 .created(body.created)
                                 .choices(vec![Choice::builder()
                                     .index(0)
-                                    .delta(Message::builder().role(role).content(content).build())
+                                    .delta(
+                                        Message::builder()
+                                            .role(role)
+                                            .content(Content::Text(content))
+                                            .build(),
+                                    )
                                     .logprobs(None)
                                     .finish_reason(None)
                                     .build()])
@@ -234,7 +241,7 @@ mod process {
                     .message(
                         Message::builder()
                             .role(Role::Assistant)
-                            .content(content)
+                            .content(Content::Text(content))
                             .build(),
                     )
                     .logprobs(None)
