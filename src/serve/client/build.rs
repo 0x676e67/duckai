@@ -155,7 +155,10 @@ fn random_impersonate() -> Impersonate {
         Impersonate::Edge101,
         Impersonate::Edge122,
         Impersonate::Edge127,
-        Impersonate::Edge131
+        Impersonate::Edge131,
+        Impersonate::Firefox109,
+        Impersonate::Firefox117,
+        Impersonate::Firefox133,
     ];
 
     *VERSIONS

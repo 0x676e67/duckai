@@ -4,13 +4,12 @@ use super::{
 };
 use crate::error::Error;
 use crate::Result;
-use axum::{
-    extract::State,
+use axum::{extract::State, response::Response, Json};
+use axum_extra::{
+    extract::WithRejection,
     headers::{authorization::Bearer, Authorization},
-    response::Response,
-    Json, TypedHeader,
+    TypedHeader,
 };
-use axum_extra::extract::WithRejection;
 use process::ChatProcess;
 use rquest::{header, Client};
 use std::sync::LazyLock;

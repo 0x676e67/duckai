@@ -21,7 +21,7 @@ rand = "0.8"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "signal"] }
 
 # client
-rquest = { version = "0.33.0", features = ["json", "stream", "cookies", "socks"] }
+rquest = { version = "1", features = ["json", "stream", "cookies", "socks"] }
 
 # log
 tracing = { version = "0.1.40" }
@@ -41,11 +41,11 @@ eventsource-stream = "0.2.3"
 async-stream = "0.3.6"
 
 # axum
-axum = { version = "0.6.20", features = ["http2", "headers"] }
-axum-server = { package = "axum-server2", version = "0.5.0", features = ["tls-boringssl"] }
-axum-extra = { version =  "0.8.0" }
-tower-http = { version = "0.4.4", default-features = false, features = ["trace", "cors"] }
-tower = { version = "0.4.13", default-features = false, features = ["limit"] }
+axum = { version = "0.7.9", features = ["http2"] }
+axum-server = { package = "axum-server2", version = "0.7.3", features = ["tls-boringssl"] }
+axum-extra = { version =  "0.9.6", features = ["typed-header"]}
+tower-http = { version = "0.6.2", default-features = false, features = ["trace", "cors"] }
+tower = { version = "0.5.2", default-features = false, features = ["limit"] }
 
 # jemalloc
 jemallocator = { package = "tikv-jemallocator", version = "0.6" }

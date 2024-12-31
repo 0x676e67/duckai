@@ -5,8 +5,7 @@ mod signal;
 
 use crate::Result;
 use crate::{config::Config, error::Error};
-use axum::headers::authorization::Bearer;
-use axum::headers::Authorization;
+use axum::Json;
 use axum::{
     extract::DefaultBodyLimit,
     http::StatusCode,
@@ -14,8 +13,10 @@ use axum::{
     routing::{get, post},
     Router,
 };
-use axum::{Json, TypedHeader};
-use axum_server::{tls_boringssl::BoringSSLConfig, AddrIncomingConfig, Handle, HttpConfig};
+use axum_extra::headers::authorization::Bearer;
+use axum_extra::headers::Authorization;
+use axum_extra::TypedHeader;
+use axum_server::{tls_boringssl::BoringSSLConfig, Handle};
 use client::ClientLoadBalancer;
 use serde::Serialize;
 use std::ops::Deref;
@@ -112,19 +113,6 @@ pub async fn run(path: PathBuf) -> Result<()> {
     // http server tcp keepalive
     let tcp_keepalive = config.tcp_keepalive.map(Duration::from_secs);
 
-    // http server config
-    let http_config = HttpConfig::new()
-        .http1_title_case_headers(true)
-        .http1_preserve_header_case(true)
-        .http2_keep_alive_interval(tcp_keepalive)
-        .build();
-
-    // http server incoming config
-    let incoming_config = AddrIncomingConfig::new()
-        .tcp_sleep_on_accept_errors(true)
-        .tcp_keepalive(tcp_keepalive)
-        .build();
-
     // Run http server
     match (config.tls_cert.as_ref(), config.tls_key.as_ref()) {
         (Some(cert), Some(key)) => {
@@ -132,19 +120,33 @@ pub async fn run(path: PathBuf) -> Result<()> {
             let tls_config = BoringSSLConfig::from_pem_chain_file(cert, key)?;
 
             // Use TLS configuration to create a secure server
-            axum_server::bind_boringssl(config.bind, tls_config)
+            let mut server = axum_server::bind_boringssl(config.bind, tls_config);
+            server
+                .http_builder()
+                .http1()
+                .preserve_header_case(true)
+                .preserve_header_case(true)
+                .http2()
+                .keep_alive_interval(tcp_keepalive);
+
+            server
                 .handle(handle)
-                .addr_incoming_config(incoming_config)
-                .http_config(http_config)
                 .serve(router.into_make_service())
                 .await
         }
         _ => {
             // No TLS configuration, create a non-secure server
-            axum_server::bind(config.bind)
+            let mut server = axum_server::bind(config.bind);
+            server
+                .http_builder()
+                .http1()
+                .preserve_header_case(true)
+                .preserve_header_case(true)
+                .http2()
+                .keep_alive_interval(tcp_keepalive);
+
+            server
                 .handle(handle)
-                .addr_incoming_config(incoming_config)
-                .http_config(http_config)
                 .serve(router.into_make_service())
                 .await
         }
