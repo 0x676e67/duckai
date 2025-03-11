@@ -54,7 +54,7 @@ jemallocator = { package = "tikv-jemallocator", version = "0.6" }
 # linux utils
 [target.'cfg(target_os = "linux")'.dependencies]
 sysctl = "0.6.0"
-rtnetlink = "0.14"
+rtnetlink = "0.15"
 netlink-packet-route = "0.19"
 
 [target.'cfg(target_family = "unix")'.dependencies]
