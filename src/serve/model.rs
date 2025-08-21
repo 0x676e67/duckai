@@ -79,7 +79,7 @@ where
         "llama-4-scout" => "meta-llama/Llama-4-Scout-17B-16E-Instruct",
         "mistral-small-3" => "mistralai/Mistral-Small-24B-Instruct-2501",
         "gpt-4o-mini" => "gpt-4o-mini",
-        "gpt-5-mini" => "gpt-5-mini"
+        "gpt-5-mini" => "gpt-5-mini",
         _ => "gpt-4o-mini",
     };
 
