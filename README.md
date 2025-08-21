@@ -18,9 +18,10 @@ DuckDuckGo AI to OpenAI API
 Model mapping, unsupported models default to `gpt-4o-mini`
 
 - gpt-4o-mini -> `gpt-4o-mini`
-- claude-3-haiku -> `claude-3-haiku-20240307`
-- llama-3.1-70b -> `meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo`
-- mixtral-8x7b -> `mistralai/Mixtral-8x7B-Instruct-v0.1`
+- gpt-5-mini -> `gpt-5-mini`
+- claude-3.5-haiku -> `claude-3-5-haiku-latest`
+- llama-4-scout -> `meta-llama/Llama-4-Scout-17B-16E-Instruct`
+- mistral-small-3 -> `mistralai/Mistral-Small-24B-Instruct-2501`
 
 ## Chat
 
