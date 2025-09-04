@@ -34,7 +34,7 @@ serde_yaml = "0.9.33"
 moka = { version = "0.12", default-features = false, features = ["future"] }
 
 # hickory-dns
-hickory-resolver = "0.24"
+hickory-resolver = "0.25"
 
 # eventsource stream
 eventsource-stream = "0.2.3"
